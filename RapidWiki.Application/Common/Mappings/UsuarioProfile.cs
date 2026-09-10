@@ -1,5 +1,6 @@
 using AutoMapper;
-using RapidWiki.Api.Usuario.CreateUsuario;
+using RapidWiki.Application.CreateUsuario;
+using RapidWiki.Application.SignIn;
 using RapidWiki.Domain.Entities;
 
 namespace RapidWiki.Application.Common.Mappings;
@@ -17,5 +18,7 @@ public class UsuarioProfile : Profile
                 dest => dest.Departamentos,
                 opt => opt.Ignore()
             );
+        
+        CreateMap<Usuario, SignInResult>();
     }
 }
