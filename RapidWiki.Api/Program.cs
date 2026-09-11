@@ -2,13 +2,18 @@ using RapidWiki.Infrastructure;
 using AutoMapper;
 using RapidWiki.Api.ExceptionHandlers;
 using RapidWiki.Application.CreateUsuario;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddInfrastructure(builder.Configuration); 
 builder.Services.AddAutoMapper( cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+});
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(typeof(CreateUsuarioHandler).Assembly);
