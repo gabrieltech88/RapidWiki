@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RapidWiki.Application.CreateProcedimento;
+using RapidWiki.Application.GetProcedimentosRequest;
 
 
 
@@ -23,5 +24,14 @@ public class ProcedimentoController : ControllerBase
     {
         var result = await _mediator.Send(request);
         return Created(string.Empty, result);
+    }
+
+    
+    [Authorize]
+    [HttpGet("get_procedimentos")]
+    public async Task<IActionResult> GetProcedimentos([FromQuery] GetProcedimentosRequest request)
+    {
+        var result = await _mediator.Send(request);
+        return Ok(result);
     }
 }

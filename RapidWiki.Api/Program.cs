@@ -1,8 +1,9 @@
 using RapidWiki.Infrastructure;
-using AutoMapper;
 using RapidWiki.Api.ExceptionHandlers;
 using RapidWiki.Application.CreateUsuario;
 using System.Text.Json.Serialization;
+using RapidWiki.Api.Authentication;
+using RapidWiki.Application.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,8 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddExceptionHandler<ArgumentNullExceptionHandler>();
 builder.Services.AddExceptionHandler<UnauthorizedAccessExceptionHandler>();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 builder.Services.AddOpenApi();
 
