@@ -7,20 +7,28 @@ using RapidWiki.Domain.Entities;
 namespace RapidWiki.Application.GetAllDepartamentos;
 public class GetAllDepartamentosHandler : IRequestHandler<GetAllDepartamentosRequest, IEnumerable<GetAllDepartamentosResult>>
 {
-    private readonly IRepository<Departamento> _departamentoRepository;
+    private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IMapper _mapper;
+    private readonly ICurrentUser _currentUser;
 
-    public GetAllDepartamentosHandler(IRepository<Departamento> departamentoRepository, IMapper mapper)
+    public GetAllDepartamentosHandler(IDepartamentoRepository departamentoRepository, IMapper mapper, ICurrentUser currentUser)
     {
         _departamentoRepository = departamentoRepository;
         _mapper = mapper;
+        _currentUser = currentUser;
     }
     public async Task<IEnumerable<GetAllDepartamentosResult>> Handle(GetAllDepartamentosRequest request, CancellationToken cancellationToken)
     {
-        var departamentos = await _departamentoRepository.GetAllAsync();
+        var usuarioId = _currentUser.Id;
+        var hasGlobalAccess = _currentUser.IsInRole("Admin");
+        var departamentos = await _departamentoRepository.GetByUserAsync(usuarioId, hasGlobalAccess, cancellationToken);
 
-        if(departamentos == null || !departamentos.Any()) throw new NullReferenceException("Não foi encontrado nenhum departamento.");
-
-        return departamentos.Select(d => _mapper.Map<GetAllDepartamentosResult>(d));
+        return departamentos.Select(departamento => 
+                new GetAllDepartamentosResult
+                {
+                    Id = departamento.Id,
+                    Nome = departamento.Nome
+                }
+            ).ToList();
     }
 }

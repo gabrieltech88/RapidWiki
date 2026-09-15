@@ -2,13 +2,14 @@ using System.Security.Claims;
 using RapidWiki.Application.Interfaces;
 
 namespace RapidWiki.Api.Authentication;
+
 public class CurrentUser : ICurrentUser
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CurrentUser(IHttpContextAccessor httpContextAccessor)
     {
-        _httpContextAccessor =  httpContextAccessor;
+        _httpContextAccessor = httpContextAccessor;
     }
 
     private ClaimsPrincipal User => _httpContextAccessor.HttpContext?.User
@@ -20,7 +21,7 @@ public class CurrentUser : ICurrentUser
     {
         get
         {
-            var value =_httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var value = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
 
             if (!Guid.TryParse(value, out var userId))
             {
@@ -28,6 +29,25 @@ public class CurrentUser : ICurrentUser
             }
 
             return userId;
+        }
+    }
+
+    public string Role
+    {
+        get
+        {
+            var role = User.FindFirstValue(
+                ClaimTypes.Role
+            );
+
+            if (string.IsNullOrWhiteSpace(role))
+            {
+                throw new UnauthorizedAccessException(
+                    "Role do usuário não encontrada."
+                );
+            }
+
+            return role;
         }
     }
 

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using RapidWiki.Application.Interfaces;
 using RapidWiki.Domain.Entities;
 
@@ -30,9 +31,9 @@ public class UsuarioRepository : IRepository<Usuario>
         throw new NotImplementedException();
     }
 
-    public Task<Usuario> GetByIdAsync(Guid id)
+    public async Task<Usuario?> GetByIdAsync(Guid id)
     {
-        throw new NotImplementedException();
+        return await _context.Usuarios.FirstOrDefaultAsync(usuario => usuario.Id == id);
     }
 
     public Task UpdateAsync(Usuario entity)

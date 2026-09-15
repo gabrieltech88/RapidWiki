@@ -7,10 +7,10 @@ using RapidWiki.Domain.Entities;
 namespace RapidWiki.Application.CreateDepartamento;
 public class CreateDepartamentoHandler : IRequestHandler<CreateDepartamentoRequest, CreateDepartamentoResult>
 {
-    private readonly IRepository<Departamento> _departamentoRepository;
+    private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IMapper _mapper;
 
-    public CreateDepartamentoHandler(IRepository<Departamento> departamentoRepository, IMapper mapper)
+    public CreateDepartamentoHandler(IDepartamentoRepository departamentoRepository, IMapper mapper)
     {
         _departamentoRepository = departamentoRepository;
         _mapper = mapper;

@@ -7,15 +7,19 @@ namespace RapidWiki.Application.CreateProcedimento;
 
 public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoRequest, Guid>
 {
-    private readonly IRepository<Procedimento> _procedimentoRepository;
-    private readonly IRepository<Departamento> _departamentoRepository;
+    private readonly IProcedimentoRepository _procedimentoRepository;
+    private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUser _currentUser;
 
-    public CreateProcedimentoHandler(IRepository<Procedimento> procedimentoRepository, IMapper mapper, IRepository<Departamento> departamentoRepository)
+    public CreateProcedimentoHandler(ICurrentUser currentUser, IProcedimentoRepository procedimentoRepository, IUnitOfWork unitOfWork,IMapper mapper, IDepartamentoRepository departamentoRepository)
     {
         _procedimentoRepository = procedimentoRepository;
         _mapper = mapper;
         _departamentoRepository = departamentoRepository;
+        _unitOfWork = unitOfWork;
+        _currentUser = currentUser;
     }
 
     public async Task<Guid> Handle(CreateProcedimentoRequest request, CancellationToken cancellationToken)
@@ -23,6 +27,8 @@ public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoReque
         if(request == null) throw new ArgumentNullException(nameof(request));
         
         var procedimento = _mapper.Map<Procedimento>(request);
+
+        procedimento.AutorId = _currentUser.Id;
 
         foreach (var departamentoId in request.DepartamentosIds)
         {
@@ -35,6 +41,7 @@ public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoReque
         }
 
         var result = await _procedimentoRepository.CreateAsync(procedimento);
+        await _unitOfWork.SaveChangesAsync();
 
         return result.Id;
 

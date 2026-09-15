@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using RapidWiki.Application.Common.Authorization;
 using RapidWiki.Application.CreateDepartamento;
 using RapidWiki.Application.GetAllDepartamentos;
 
@@ -17,6 +18,7 @@ public class DepartamentoController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = $"{Roles.Admin}")]
     [HttpPost("create_departamento")]
     public async Task<IActionResult> CreateDepartamento([FromBody] CreateDepartamentoRequest request)
     {
@@ -24,7 +26,7 @@ public class DepartamentoController : ControllerBase
         return Created(string.Empty, result);
     }
 
-    [Authorize(Roles = "Admin")]
+    [Authorize]
     [HttpGet("get_all_departamentos")]
     public async Task<IActionResult> GetAllDepartamentos()
     {

@@ -32,14 +32,16 @@ public static class DependencyInjection
             options.Cookie.Name = "RapidWiki.Auth";
             options.Cookie.HttpOnly = true;
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.None;
             options.ExpireTimeSpan = TimeSpan.FromHours(3);
-            options.SlidingExpiration = true;
         });
 
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IAuthService, AuthenticationService>();
         services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
-        services.AddScoped<IRepository<Departamento>, DepartamentoRepository>();
-         services.AddScoped<IRepository<Procedimento>, ProcedimentoRepository>();
+        services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
+         services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

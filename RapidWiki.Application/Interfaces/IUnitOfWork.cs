@@ -1,11 +1,10 @@
 
-namespace RapidWiki.Application.Interfaces
+namespace RapidWiki.Application.Interfaces;
+
+public interface IUnitOfWork
 {
-    public interface IUnitOfWork
-    {
-        Task BeginTransactionAsync();
-        Task CommitAsync();
-        Task SaveChangesAsync();
-        Task RollbackAsync();
-    }
+    Task BeginTransactionAsync();
+    Task CommitAsync();
+    Task SaveChangesAsync();
+    Task RollbackAsync();
 }

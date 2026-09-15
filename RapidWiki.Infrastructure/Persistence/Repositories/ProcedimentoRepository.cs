@@ -1,28 +1,146 @@
 using Microsoft.EntityFrameworkCore;
-using RapidWiki.Application.CreateProcedimento;
+using RapidWiki.Application.Common.Dto;
+using RapidWiki.Application.GetProcedimentosRequest;
 using RapidWiki.Application.Interfaces;
 using RapidWiki.Domain.Entities;
+using RapidWiki.Domain.Enums;
 
 namespace RapidWiki.Infrastructure.Persistence.Repositories;
 
-public class ProcedimentoRepository : IRepository<Procedimento>
+public class ProcedimentoRepository : IProcedimentoRepository
 {
     private readonly RapidWikiDbContext _context;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public ProcedimentoRepository(RapidWikiDbContext context, IUnitOfWork unitOfWork)
+    public ProcedimentoRepository(RapidWikiDbContext context)
     {
         _context = context;
-        _unitOfWork = unitOfWork;
-
     }
 
-    public async Task<Procedimento> CreateAsync(Procedimento entity)
+    public async Task<Procedimento> CreateAsync(
+        Procedimento entity)
     {
-        var result = await _context.Procedimentos.AddAsync(entity);
-        await _unitOfWork.SaveChangesAsync();
+        var result =
+            await _context.Procedimentos.AddAsync(entity);
+
+
 
         return result.Entity;
+    }
+
+    public async Task<GetProcedimentosResult> GetPagedByUserAsync(Guid usuarioId, bool hasGlobalAccess, int page, string? search, Guid? departamentoId, StatusProcedimento status, CancellationToken cancellationToken = default)
+    {
+        const int pageSize = 8;
+
+        if (page < 1)
+        {
+            page = 1;
+        }
+
+        var query = _context
+            .Procedimentos
+            .AsNoTracking()
+            .Where(p => p.Status == status);
+
+        if (departamentoId.HasValue)
+        {
+            var departamentoSelecionadoId =
+                departamentoId.Value;
+
+            if (hasGlobalAccess)
+            {
+                query = query.Where(p =>
+                    p.Departamentos.Any(d =>
+                        d.Id == departamentoSelecionadoId
+                    )
+                );
+            }
+            else
+            {
+                query = query.Where(p =>
+                    p.Departamentos.Any(d =>
+                        d.Id == departamentoSelecionadoId &&
+                        d.Usuarios.Any(u =>
+                            u.Id == usuarioId
+                        )
+                    )
+                );
+            }
+        }
+        else if (!hasGlobalAccess)
+        {
+            query = query.Where(p =>
+                p.Departamentos.Any(d =>
+                    d.Usuarios.Any(u =>
+                        u.Id == usuarioId
+                    )
+                )
+            );
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term =
+                search.Trim();
+
+            query = query.Where(p =>
+                p.Titulo.Contains(term) ||
+                p.Descricao.Contains(term)
+            );
+        }
+
+        var totalItems =
+            await query.CountAsync(
+                cancellationToken
+            );
+
+        var items =
+            await query
+                .OrderByDescending(p =>
+                    p.AtualizadoEm
+                )
+                .Skip(
+                    (page - 1) * pageSize
+                )
+                .Take(pageSize)
+                .Select(p =>
+                    new ProcedimentoDto
+                    {
+                        Id = p.Id,
+
+                        Titulo =
+                            p.Titulo,
+
+                        Descricao =
+                            p.Descricao,
+
+                        Conteudo =
+                            p.Conteudo,
+
+                        Autor =
+                            new AutorDto
+                            {
+                                Id =
+                                    p.Autor.Id,
+
+                                Nome =
+                                    p.Autor.Nome,
+                            },
+
+                        AtualizadoEm =
+                            p.AtualizadoEm
+                    }
+                )
+                .ToListAsync(
+                    cancellationToken
+                );
+
+        return new GetProcedimentosResult
+        {
+            Items = items,
+            Page = page,
+            PageSize = pageSize,
+            TotalItems = totalItems,
+        };
     }
 
     public Task DeleteAsync(Guid id)
@@ -30,12 +148,34 @@ public class ProcedimentoRepository : IRepository<Procedimento>
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<Procedimento>> GetAllAsync()
+    public async Task<IEnumerable<Procedimento>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<Procedimento> GetByIdAsync(Guid id)
+    public async Task<Procedimento> GetByIdByUserAsync(Guid procedimentoId, Guid usuarioId, bool hasGlobalAccess)
+    {
+        var query = _context.Procedimentos
+            .AsNoTracking()
+            .Include(p => p.Autor)
+            .Include(p => p.Departamentos)
+            .Where(p => p.Id == procedimentoId);
+
+        if (!hasGlobalAccess)
+        {
+            query = query.Where(p =>
+                p.Departamentos.Any(d =>
+                    d.Usuarios.Any(u =>
+                        u.Id == usuarioId
+                    )
+                )
+            );
+        }
+
+        return await query.FirstOrDefaultAsync();
+    }
+
+    public async Task<Procedimento> GetByIdAsync(Guid id)
     {
         throw new NotImplementedException();
     }

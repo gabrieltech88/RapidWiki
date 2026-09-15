@@ -19,6 +19,9 @@ public class RapidWikiDbContext : IdentityDbContext<IdentityUser<Guid>, Identity
     {
         base.OnModelCreating(modelBuilder);
 
+        modelBuilder.Entity<Departamento>()
+            .HasIndex(d => d.Nome)
+            .IsUnique();
 
         // Usuario <-> Departamento
         modelBuilder.Entity<Usuario>()
