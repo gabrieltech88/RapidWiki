@@ -7,13 +7,13 @@ namespace RapidWiki.Application.CreateUsuario;
 
 public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest,CreateUsuarioResult>
 {
-    private readonly IRepository<Usuario> _usuarioRepository;
+    private readonly IUsuarioRepository _usuarioRepository;
     private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IIdentityService _identityService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
 
-    public CreateUsuarioHandler(IRepository<Usuario> usuarioRepository,
+    public CreateUsuarioHandler(IUsuarioRepository usuarioRepository,
         IDepartamentoRepository departamentoRepository,
         IIdentityService identityService,
         IUnitOfWork unitOfWork,

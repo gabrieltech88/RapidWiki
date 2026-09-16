@@ -16,4 +16,16 @@ public class Usuario
         Nome = nome;
     }
 
+    public void Atualizar(string nome, IEnumerable<Departamento> departamentos)
+    {
+        Nome = nome;
+
+        Departamentos.Clear();
+
+        foreach (var departamento in departamentos)
+        {
+            Departamentos.Add(departamento);
+        }
+    }
+
 }

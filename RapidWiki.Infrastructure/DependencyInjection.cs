@@ -39,7 +39,7 @@ public static class DependencyInjection
         services.AddScoped<IIdentityService, IdentityService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IAuthService, AuthenticationService>();
-        services.AddScoped<IRepository<Usuario>, UsuarioRepository>();
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
          services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -5,6 +5,7 @@ using RapidWiki.Application.Common.Authorization;
 using RapidWiki.Application.CreateProcedimento;
 using RapidWiki.Application.GetProcedimentoById;
 using RapidWiki.Application.GetProcedimentosRequest;
+using RapidWiki.Application.UpdateProcedimento;
 
 
 
@@ -42,6 +43,14 @@ public class ProcedimentoController : ControllerBase
     public async Task<IActionResult> GetProcedimentoById(Guid id)
     {
         var result = await _mediator.Send(new GetProcedimentoByIdRequest(id));
+        return Ok(result);
+    }
+
+    [Authorize(Roles=$"{Roles.Admin}, {Roles.Editor}")]
+    [HttpPut("update_procedimento")]
+    public async Task<IActionResult> UpdateProcedimento([FromBody] UpdateProcedimentoRequest request)
+    {
+        var result = await _mediator.Send(request);
         return Ok(result);
     }
 }

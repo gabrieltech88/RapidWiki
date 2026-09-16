@@ -8,9 +8,9 @@ public class GetCurrentUserHandler : IRequestHandler<GetCurrentUserRequest,GetCu
 {
     private readonly ICurrentUser _currentUser;
 
-    private readonly IRepository<Usuario> _usuarioRepository;
+    private readonly IUsuarioRepository _usuarioRepository;
 
-    public GetCurrentUserHandler(ICurrentUser currentUser, IRepository<Usuario> usuarioRepository)
+    public GetCurrentUserHandler(ICurrentUser currentUser, IUsuarioRepository usuarioRepository)
     {
         _currentUser = currentUser;
         _usuarioRepository = usuarioRepository;

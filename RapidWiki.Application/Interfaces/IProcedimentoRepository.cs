@@ -8,4 +8,5 @@ public interface IProcedimentoRepository : IRepository<Procedimento>
 {
     Task<GetProcedimentosResult> GetPagedByUserAsync(Guid id, bool isAdmin, int page, string? search, Guid? departamentoId, StatusProcedimento status, CancellationToken cancellationToken = default);
     Task<Procedimento> GetByIdByUserAsync(Guid procedimentoId, Guid usuarioId, bool hasGlobalAccess);
+    Task<Procedimento?> GetByIdForUpdateAsync(Guid procedimentoId, Guid usuarioId, bool hasGlobalAccess, CancellationToken cancellationToken = default);
 }

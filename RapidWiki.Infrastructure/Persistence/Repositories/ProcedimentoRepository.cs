@@ -16,14 +16,9 @@ public class ProcedimentoRepository : IProcedimentoRepository
         _context = context;
     }
 
-    public async Task<Procedimento> CreateAsync(
-        Procedimento entity)
+    public async Task<Procedimento> CreateAsync(Procedimento entity)
     {
-        var result =
-            await _context.Procedimentos.AddAsync(entity);
-
-
-
+        var result = await _context.Procedimentos.AddAsync(entity);
         return result.Entity;
     }
 
@@ -36,103 +31,50 @@ public class ProcedimentoRepository : IProcedimentoRepository
             page = 1;
         }
 
-        var query = _context
-            .Procedimentos
-            .AsNoTracking()
-            .Where(p => p.Status == status);
+        var query = _context.Procedimentos.AsNoTracking().Where(p => p.Status == status);
 
         if (departamentoId.HasValue)
         {
-            var departamentoSelecionadoId =
-                departamentoId.Value;
+            var departamentoSelecionadoId = departamentoId.Value;
 
             if (hasGlobalAccess)
             {
-                query = query.Where(p =>
-                    p.Departamentos.Any(d =>
-                        d.Id == departamentoSelecionadoId
-                    )
-                );
+                query = query.Where(p => p.Departamentos.Any(d => d.Id == departamentoSelecionadoId));
             }
             else
             {
-                query = query.Where(p =>
-                    p.Departamentos.Any(d =>
-                        d.Id == departamentoSelecionadoId &&
-                        d.Usuarios.Any(u =>
-                            u.Id == usuarioId
-                        )
-                    )
-                );
+                query = query.Where(p => p.Departamentos.Any(d => d.Id == departamentoSelecionadoId && d.Usuarios.Any(u => u.Id == usuarioId)));
             }
         }
         else if (!hasGlobalAccess)
         {
-            query = query.Where(p =>
-                p.Departamentos.Any(d =>
-                    d.Usuarios.Any(u =>
-                        u.Id == usuarioId
-                    )
-                )
-            );
+            query = query.Where(p => p.Departamentos.Any(d => d.Usuarios.Any(u => u.Id == usuarioId)));
         }
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var term =
-                search.Trim();
-
-            query = query.Where(p =>
-                p.Titulo.Contains(term) ||
-                p.Descricao.Contains(term)
-            );
+            var term = search.Trim();
+            query = query.Where(p => p.Titulo.Contains(term) || p.Descricao.Contains(term));
         }
 
-        var totalItems =
-            await query.CountAsync(
-                cancellationToken
-            );
+        var totalItems = await query.CountAsync(cancellationToken);
 
-        var items =
-            await query
-                .OrderByDescending(p =>
-                    p.AtualizadoEm
-                )
-                .Skip(
-                    (page - 1) * pageSize
-                )
-                .Take(pageSize)
+        var items = await query.OrderByDescending(p => p.AtualizadoEm).Skip((page - 1) * pageSize).Take(pageSize)
                 .Select(p =>
                     new ProcedimentoDto
                     {
                         Id = p.Id,
-
-                        Titulo =
-                            p.Titulo,
-
-                        Descricao =
-                            p.Descricao,
-
-                        Conteudo =
-                            p.Conteudo,
-
-                        Autor =
-                            new AutorDto
-                            {
-                                Id =
-                                    p.Autor.Id,
-
-                                Nome =
-                                    p.Autor.Nome,
-                            },
-
-                        AtualizadoEm =
-                            p.AtualizadoEm
+                        Titulo = p.Titulo,
+                        Descricao = p.Descricao,
+                        Conteudo = p.Conteudo,
+                        Autor = new AutorDto
+                        {
+                            Id = p.Autor.Id,
+                            Nome = p.Autor.Nome,
+                        },
+                        AtualizadoEm = p.AtualizadoEm
                     }
-                )
-                .ToListAsync(
-                    cancellationToken
-                );
+                ).ToListAsync(cancellationToken);
 
         return new GetProcedimentosResult
         {
@@ -142,6 +84,19 @@ public class ProcedimentoRepository : IProcedimentoRepository
             TotalItems = totalItems,
         };
     }
+
+    public async Task<Procedimento?> GetByIdForUpdateAsync(Guid procedimentoId, Guid usuarioId, bool hasGlobalAccess, CancellationToken cancellationToken = default)
+    {
+        var query =_context.Procedimentos.Include(p => p.Departamentos).Where(p => p.Id == procedimentoId);
+
+        if (!hasGlobalAccess)
+        {
+            query = query.Where(p => p.Departamentos.Any(d => d.Usuarios.Any(u => u.Id == usuarioId)));
+        }
+
+        return await query.FirstOrDefaultAsync(cancellationToken);
+    }
+
 
     public Task DeleteAsync(Guid id)
     {
@@ -163,13 +118,7 @@ public class ProcedimentoRepository : IProcedimentoRepository
 
         if (!hasGlobalAccess)
         {
-            query = query.Where(p =>
-                p.Departamentos.Any(d =>
-                    d.Usuarios.Any(u =>
-                        u.Id == usuarioId
-                    )
-                )
-            );
+            query = query.Where(p => p.Departamentos.Any(d => d.Usuarios.Any(u => u.Id == usuarioId)));
         }
 
         return await query.FirstOrDefaultAsync();

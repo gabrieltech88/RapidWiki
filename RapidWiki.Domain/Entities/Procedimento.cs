@@ -17,6 +17,23 @@ public class Procedimento
 
     private Procedimento() { }
 
+    public void Atualizar(string titulo, string descricao, string conteudo, StatusProcedimento status, IEnumerable<Departamento> departamentos)
+    {
+        Titulo = titulo;
+        Descricao = descricao;
+        Conteudo = conteudo;
+        Status = status;
+
+        Departamentos.Clear();
+
+        foreach (var departamento in departamentos)
+        {
+            Departamentos.Add(departamento);
+        }
+
+        AtualizadoEm = DateTime.UtcNow;
+    }
+
     public Procedimento(string titulo, Guid autorId, Usuario autor, StatusProcedimento status, string descricao, ICollection<Departamento> departamentos, string conteudo)
     {
         Id = Guid.NewGuid();

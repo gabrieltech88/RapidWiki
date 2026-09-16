@@ -2,17 +2,17 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace RapidWiki.Api.ExceptionHandlers;
-public class UnauthorizedAccessExceptionHandler : IExceptionHandler
+public class KeyNotFoundExceptionHandler : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext,Exception exception, CancellationToken cancellationToken)
     {
-        if (exception is not UnauthorizedAccessException unauthorizedAccessException)
+        if (exception is not KeyNotFoundException keyNotFoundException)
             return false;
 
         var problemDetails = new ProblemDetails
         {
-            Status = StatusCodes.Status403Forbidden,
-            Title = "Acesso negado",
+            Status = StatusCodes.Status404NotFound,
+            Title = "Recurso não encontrado",
             Detail = exception.Message,
             Instance = httpContext.Request.Path
         };

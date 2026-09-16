@@ -12,7 +12,7 @@ public class ArgumentNullExceptionHandler : IExceptionHandler
         var problemDetails = new ProblemDetails
         {
             Status = StatusCodes.Status400BadRequest,
-            Title = "Parâmetro inválido",
+            Title = "Dados obrigatórios ausentes",
             Detail = exception.Message,
             Instance = httpContext.Request.Path
         };
