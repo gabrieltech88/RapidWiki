@@ -255,9 +255,17 @@ namespace RapidWiki.Infrastructure.Migrations
 
                     b.Property<string>("Nome")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid?>("ProcedimentoRascunhoId")
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Nome")
+                        .IsUnique();
+
+                    b.HasIndex("ProcedimentoRascunhoId");
 
                     b.ToTable("Departamentos");
                 });
@@ -270,6 +278,9 @@ namespace RapidWiki.Infrastructure.Migrations
 
                     b.Property<DateTime>("AtualizadoEm")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("AtualizadoPorId")
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("AutorId")
                         .HasColumnType("char(36)");
@@ -294,9 +305,51 @@ namespace RapidWiki.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AtualizadoPorId");
+
                     b.HasIndex("AutorId");
 
                     b.ToTable("Procedimentos");
+                });
+
+            modelBuilder.Entity("RapidWiki.Domain.Entities.ProcedimentoRascunho", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("AtualizadoEm")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Conteudo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("EditorId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ProcedimentoId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EditorId");
+
+                    b.HasIndex("ProcedimentoId")
+                        .IsUnique();
+
+                    b.ToTable("ProcedimentosRascunhos");
                 });
 
             modelBuilder.Entity("RapidWiki.Domain.Entities.Usuario", b =>
@@ -395,15 +448,57 @@ namespace RapidWiki.Infrastructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RapidWiki.Domain.Entities.Departamento", b =>
+                {
+                    b.HasOne("RapidWiki.Domain.Entities.ProcedimentoRascunho", null)
+                        .WithMany("Departamentos")
+                        .HasForeignKey("ProcedimentoRascunhoId");
+                });
+
             modelBuilder.Entity("RapidWiki.Domain.Entities.Procedimento", b =>
                 {
+                    b.HasOne("RapidWiki.Domain.Entities.Usuario", "AtualizadoPor")
+                        .WithMany()
+                        .HasForeignKey("AtualizadoPorId");
+
                     b.HasOne("RapidWiki.Domain.Entities.Usuario", "Autor")
                         .WithMany("Procedimentos")
                         .HasForeignKey("AutorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("AtualizadoPor");
+
                     b.Navigation("Autor");
+                });
+
+            modelBuilder.Entity("RapidWiki.Domain.Entities.ProcedimentoRascunho", b =>
+                {
+                    b.HasOne("RapidWiki.Domain.Entities.Usuario", "Editor")
+                        .WithMany()
+                        .HasForeignKey("EditorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("RapidWiki.Domain.Entities.Procedimento", "Procedimento")
+                        .WithOne("Rascunho")
+                        .HasForeignKey("RapidWiki.Domain.Entities.ProcedimentoRascunho", "ProcedimentoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Editor");
+
+                    b.Navigation("Procedimento");
+                });
+
+            modelBuilder.Entity("RapidWiki.Domain.Entities.Procedimento", b =>
+                {
+                    b.Navigation("Rascunho");
+                });
+
+            modelBuilder.Entity("RapidWiki.Domain.Entities.ProcedimentoRascunho", b =>
+                {
+                    b.Navigation("Departamentos");
                 });
 
             modelBuilder.Entity("RapidWiki.Domain.Entities.Usuario", b =>

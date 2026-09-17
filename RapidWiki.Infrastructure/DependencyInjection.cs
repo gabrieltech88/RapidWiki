@@ -1,26 +1,55 @@
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using RapidWiki.Application.Interfaces;
 using RapidWiki.Infrastructure.Persistence;
+using RapidWiki.Infrastructure.Persistence.Repositories;
+using RapidWiki.Infrastructure.Services;
 
-namespace RapidWiki.Infrastructure
+namespace RapidWiki.Infrastructure;
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+        var connectionString =
+            configuration.GetConnectionString("DefaultConnection");
+
+        services.AddDbContext<RapidWikiDbContext>(options =>
+            options.UseMySql(
+                connectionString,
+                ServerVersion.AutoDetect(connectionString)));
+
+        services.AddIdentity<IdentityUser<Guid>, IdentityRole<Guid>>()
+            .AddEntityFrameworkStores<RapidWikiDbContext>()
+            .AddDefaultTokenProviders();
+
+        services.ConfigureApplicationCookie(options =>
         {
-            var connectionString =
-                configuration.GetConnectionString("DefaultConnection");
+            options.Cookie.Name = "RapidWiki.Auth";
+            options.Cookie.HttpOnly = true;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.ExpireTimeSpan = TimeSpan.FromHours(3);
+        });
 
-            services.AddDbContext<RapidWikiDbContext>(options =>
-                options.UseMySql(
-                    connectionString,
-                    ServerVersion.AutoDetect(connectionString)));
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IImageStorageService, ImageStorageService>();
+        services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IAuthService, AuthenticationService>();
+        
+        services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+        services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
+        services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
+        services.AddScoped<IProcedimentoRascunhoRepository, ProcedimentoRascunhoRepository>();
 
-            return services;
-        }
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        return services;
     }
-
 }
+
+
 
