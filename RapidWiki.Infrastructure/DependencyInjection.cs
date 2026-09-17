@@ -46,6 +46,7 @@ public static class DependencyInjection
         services.AddScoped<IProcedimentoRascunhoRepository, ProcedimentoRascunhoRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }
