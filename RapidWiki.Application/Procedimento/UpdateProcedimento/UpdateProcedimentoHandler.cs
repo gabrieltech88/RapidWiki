@@ -1,19 +1,23 @@
 using MediatR;
 using RapidWiki.Application.Interfaces;
 using RapidWiki.Domain.Entities;
+using RapidWiki.Domain.Enums;
 
 namespace RapidWiki.Application.UpdateProcedimento;
+
 public class UpdateProcedimentoHandler : IRequestHandler<UpdateProcedimentoRequest, Guid>
 {
     private readonly ICurrentUser _currentUser;
     private readonly IProcedimentoRepository _procedimentoRepository;
+    private readonly IProcedimentoRascunhoRepository _procedimentoRascunhoRepository;
     private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IUnitOfWork _unitOfWork;
 
-    public UpdateProcedimentoHandler(ICurrentUser currentUser, IProcedimentoRepository procedimentoRepository, IDepartamentoRepository departamentoRepository, IUnitOfWork unitOfWork)
+    public UpdateProcedimentoHandler(ICurrentUser currentUser, IProcedimentoRepository procedimentoRepository, IProcedimentoRascunhoRepository procedimentoRascunhoRepository, IDepartamentoRepository departamentoRepository, IUnitOfWork unitOfWork)
     {
         _currentUser = currentUser;
         _procedimentoRepository = procedimentoRepository;
+        _procedimentoRascunhoRepository = procedimentoRascunhoRepository;
         _departamentoRepository = departamentoRepository;
         _unitOfWork = unitOfWork;
     }
@@ -30,21 +34,11 @@ public class UpdateProcedimentoHandler : IRequestHandler<UpdateProcedimentoReque
             throw new KeyNotFoundException("Procedimento não encontrado.");
         }
 
-        var departamentosPermitidos = await _departamentoRepository.GetByUserAsync(usuarioId, isAdmin, cancellationToken);
-        var departamentosPermitidosIds = departamentosPermitidos.Select(d => d.Id).ToHashSet();
-
         var departamentosIds = request.DepartamentosIds.Distinct().ToList();
 
         if (departamentosIds.Count == 0)
         {
             throw new ArgumentException("Selecione pelo menos um departamento.");
-        }
-
-        var possuiDepartamentoNaoPermitido = departamentosIds.Any(id => !departamentosPermitidosIds.Contains(id));
-
-        if (possuiDepartamentoNaoPermitido)
-        {
-            throw new UnauthorizedAccessException("Você não possui acesso a um ou mais departamentos selecionados.");
         }
 
         var departamentos = new List<Departamento>();
@@ -61,15 +55,78 @@ public class UpdateProcedimentoHandler : IRequestHandler<UpdateProcedimentoReque
             departamentos.Add(departamento);
         }
 
-        procedimento.Atualizar(
-            request.Titulo,
-            request.Descricao,
-            request.Conteudo,
-            request.Status,
-            departamentos
-        );
+        if (procedimento.Status == StatusProcedimento.Publicado && request.Status == StatusProcedimento.Rascunho)
+        {
+            var rascunho = await _procedimentoRascunhoRepository.GetByProcedimentoIdAsync(procedimento.Id, cancellationToken);
 
-        await _unitOfWork.SaveChangesAsync();
-        return procedimento.Id;
+            if (rascunho is null)
+            {
+                rascunho = new ProcedimentoRascunho(
+                    procedimento,
+                    request.Titulo,
+                    request.Descricao,
+                    request.Conteudo,
+                    departamentos,
+                    usuarioId
+                );
+
+                await _procedimentoRascunhoRepository.CreateAsync(rascunho, cancellationToken);
+            }
+            else
+            {
+                rascunho.Atualizar(
+                    request.Titulo,
+                    request.Descricao,
+                    request.Conteudo,
+                    departamentos,
+                    usuarioId
+                );
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return procedimento.Id;
+        }
+
+        if (procedimento.Status == StatusProcedimento.Rascunho && request.Status == StatusProcedimento.Rascunho)
+        {
+            procedimento.Atualizar(
+                request.Titulo,
+                request.Descricao,
+                request.Conteudo,
+                StatusProcedimento.Rascunho,
+                departamentos,
+                usuarioId
+            );
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return procedimento.Id;
+        }
+
+        if (request.Status == StatusProcedimento.Publicado)
+        {
+            procedimento.Atualizar(
+                request.Titulo,
+                request.Descricao,
+                request.Conteudo,
+                StatusProcedimento.Publicado,
+                departamentos,
+                usuarioId
+            );
+
+            var rascunho = await _procedimentoRascunhoRepository.GetByProcedimentoIdAsync(procedimento.Id, cancellationToken);
+
+            if (rascunho is not null)
+            {
+                _procedimentoRascunhoRepository.Delete(rascunho);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return procedimento.Id;
+        }
+
+        throw new ArgumentException("Status do procedimento inválido.");
     }
 }

@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RapidWiki.Application.Interfaces;
-using RapidWiki.Domain.Entities;
 using RapidWiki.Infrastructure.Persistence;
 using RapidWiki.Infrastructure.Persistence.Repositories;
 using RapidWiki.Infrastructure.Services;
@@ -37,11 +36,15 @@ public static class DependencyInjection
         });
 
         services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IImageStorageService, ImageStorageService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IAuthService, AuthenticationService>();
+        
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
-         services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
+        services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
+        services.AddScoped<IProcedimentoRascunhoRepository, ProcedimentoRascunhoRepository>();
+
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;

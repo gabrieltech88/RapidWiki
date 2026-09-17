@@ -13,7 +13,7 @@ public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoReque
     private readonly IUnitOfWork _unitOfWork;
     private readonly ICurrentUser _currentUser;
 
-    public CreateProcedimentoHandler(ICurrentUser currentUser, IProcedimentoRepository procedimentoRepository, IUnitOfWork unitOfWork,IMapper mapper, IDepartamentoRepository departamentoRepository)
+    public CreateProcedimentoHandler(ICurrentUser currentUser, IProcedimentoRepository procedimentoRepository, IUnitOfWork unitOfWork, IMapper mapper, IDepartamentoRepository departamentoRepository)
     {
         _procedimentoRepository = procedimentoRepository;
         _mapper = mapper;
@@ -24,27 +24,37 @@ public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoReque
 
     public async Task<Guid> Handle(CreateProcedimentoRequest request, CancellationToken cancellationToken)
     {
-        if(request == null) throw new ArgumentNullException(nameof(request));
-        
-        var procedimento = _mapper.Map<Procedimento>(request);
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
 
+        var departamentosIds = request.DepartamentosIds.Distinct().ToList();
+
+        if (departamentosIds.Count == 0)
+        {
+            throw new ArgumentException("Selecione pelo menos um departamento.");
+        }
+
+        var procedimento = _mapper.Map<Procedimento>(request);
         procedimento.AutorId = _currentUser.Id;
 
-        foreach (var departamentoId in request.DepartamentosIds)
+        foreach (var departamentoId in departamentosIds)
         {
             var departamento = await _departamentoRepository.GetByIdAsync(departamentoId);
-            if (departamento == null)
+
+            if (departamento is null)
             {
-                throw new ArgumentException($"Departamento with ID {departamentoId} not found.");
+                throw new KeyNotFoundException($"Departamento {departamentoId} não encontrado.");
             }
+
             procedimento.Departamentos.Add(departamento);
         }
 
         var result = await _procedimentoRepository.CreateAsync(procedimento);
+
         await _unitOfWork.SaveChangesAsync();
 
         return result.Id;
-
-        
     }
 }

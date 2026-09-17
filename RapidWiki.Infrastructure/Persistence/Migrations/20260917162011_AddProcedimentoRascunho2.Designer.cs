@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RapidWiki.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using RapidWiki.Infrastructure.Persistence;
 namespace RapidWiki.Infrastructure.Migrations
 {
     [DbContext(typeof(RapidWikiDbContext))]
-    partial class RapidWikiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260917162011_AddProcedimentoRascunho2")]
+    partial class AddProcedimentoRascunho2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

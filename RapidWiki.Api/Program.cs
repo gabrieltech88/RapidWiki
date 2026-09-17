@@ -10,6 +10,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration); 
 builder.Services.AddAutoMapper( cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(8018);
+});
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
@@ -33,7 +38,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins("http://localhost:5173", "http://200.219.56.54")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

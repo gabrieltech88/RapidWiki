@@ -22,7 +22,7 @@ public class ProcedimentoRepository : IProcedimentoRepository
         return result.Entity;
     }
 
-    public async Task<GetProcedimentosResult> GetPagedByUserAsync(Guid usuarioId, bool hasGlobalAccess, int page, string? search, Guid? departamentoId, StatusProcedimento status, CancellationToken cancellationToken = default)
+    public async Task<GetProcedimentosResult> GetPagedByUserAsync(Guid usuarioId, bool hasGlobalAccess, int page, string? search, Guid? departamentoId, StatusProcedimento? status, CancellationToken cancellationToken = default)
     {
         const int pageSize = 8;
 
@@ -31,7 +31,12 @@ public class ProcedimentoRepository : IProcedimentoRepository
             page = 1;
         }
 
-        var query = _context.Procedimentos.AsNoTracking().Where(p => p.Status == status);
+        var query = _context.Procedimentos.AsNoTracking().AsQueryable();
+
+        if (status.HasValue)
+        {
+            query = query.Where(p => p.Status == status.Value);
+        }
 
         if (departamentoId.HasValue)
         {
@@ -59,22 +64,24 @@ public class ProcedimentoRepository : IProcedimentoRepository
 
         var totalItems = await query.CountAsync(cancellationToken);
 
-        var items = await query.OrderByDescending(p => p.AtualizadoEm).Skip((page - 1) * pageSize).Take(pageSize)
-                .Select(p =>
-                    new ProcedimentoDto
-                    {
-                        Id = p.Id,
-                        Titulo = p.Titulo,
-                        Descricao = p.Descricao,
-                        Conteudo = p.Conteudo,
-                        Autor = new AutorDto
-                        {
-                            Id = p.Autor.Id,
-                            Nome = p.Autor.Nome,
-                        },
-                        AtualizadoEm = p.AtualizadoEm
-                    }
-                ).ToListAsync(cancellationToken);
+        var items = await query
+            .OrderByDescending(p => p.AtualizadoEm)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(p => new ProcedimentoDto
+            {
+                Id = p.Id,
+                Titulo = p.Titulo,
+                Descricao = p.Descricao,
+                Conteudo = p.Conteudo,
+                Autor = new AutorDto
+                {
+                    Id = p.Autor.Id,
+                    Nome = p.Autor.Nome,
+                },
+                AtualizadoEm = p.AtualizadoEm
+            })
+            .ToListAsync(cancellationToken);
 
         return new GetProcedimentosResult
         {
@@ -87,7 +94,9 @@ public class ProcedimentoRepository : IProcedimentoRepository
 
     public async Task<Procedimento?> GetByIdForUpdateAsync(Guid procedimentoId, Guid usuarioId, bool hasGlobalAccess, CancellationToken cancellationToken = default)
     {
-        var query =_context.Procedimentos.Include(p => p.Departamentos).Where(p => p.Id == procedimentoId);
+        var query = _context.Procedimentos
+            .Include(p => p.Departamentos)
+            .Where(p => p.Id == procedimentoId);
 
         if (!hasGlobalAccess)
         {
@@ -97,10 +106,18 @@ public class ProcedimentoRepository : IProcedimentoRepository
         return await query.FirstOrDefaultAsync(cancellationToken);
     }
 
-
-    public Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var procedimento = await _context.Procedimentos
+            .Include(p => p.Departamentos)
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        if (procedimento is null)
+        {
+            return;
+        }
+
+        _context.Procedimentos.Remove(procedimento);
     }
 
     public async Task<IEnumerable<Procedimento>> GetAllAsync()

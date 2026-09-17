@@ -20,17 +20,20 @@ public class GetProcedimentosHandler : IRequestHandler<GetProcedimentosRequest, 
         var userId = _currentUser.Id;
         var isAdmin = _currentUser.IsInRole("Admin");
         var isEditor = _currentUser.IsInRole("Editor");
-        var canViewDrafts = isAdmin || isEditor;
 
-        var status = request.Status ?? StatusProcedimento.Publicado;
+        StatusProcedimento? status = request.Status;
 
-        if (
-            status == StatusProcedimento.Rascunho && !canViewDrafts
-        )
+        if (!isAdmin && !isEditor)
         {
-            throw new UnauthorizedAccessException("Você não tem permissão para visualizar rascunhos.");
-        }
+            if (status == StatusProcedimento.Rascunho)
+            {
+                throw new UnauthorizedAccessException(
+                    "Você não tem permissão para visualizar rascunhos."
+                );
+            }
 
+            status = StatusProcedimento.Publicado;
+        }
 
         return await _procedimentoRepository
             .GetPagedByUserAsync(

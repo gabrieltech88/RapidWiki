@@ -14,5 +14,10 @@ namespace RapidWiki.Domain.Entities
             Id = Guid.NewGuid();
             Nome = nome;
         }
+
+        public void AtualizarNome(string nome)
+        {
+            Nome = nome;
+        }
     }
 }

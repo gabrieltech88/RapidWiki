@@ -25,9 +25,16 @@ public class DepartamentoRepository : IDepartamentoRepository
     }
 
 
-    public Task DeleteAsync(Guid id)
+    public async Task DeleteAsync(Guid id)
     {
-        throw new NotImplementedException();
+        var departamento = await _context.Departamentos.FindAsync(id);
+
+        if (departamento is null)
+            return;
+
+        _context.Departamentos.Remove(departamento);
+
+        await _unitOfWork.SaveChangesAsync();
     }
 
     public async Task<IEnumerable<Departamento>> GetAllAsync()
@@ -58,8 +65,9 @@ public class DepartamentoRepository : IDepartamentoRepository
         return await query.OrderBy(departamento => departamento.Nome).ToListAsync(cancellationToken);
     }
 
-    public Task UpdateAsync(Departamento entity)
+    public async Task UpdateAsync(Departamento entity)
     {
-        throw new NotImplementedException();
+        _context.Departamentos.Update(entity);
+        await _unitOfWork.SaveChangesAsync();
     }
 }

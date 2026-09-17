@@ -1,4 +1,4 @@
-namespace RapidWiki.Application.Common;
+namespace RapidWiki.Application.Common.Dto;
 
 public record DepartamentoDto
 {

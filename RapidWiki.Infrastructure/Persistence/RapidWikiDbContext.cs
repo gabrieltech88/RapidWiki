@@ -14,6 +14,7 @@ public class RapidWikiDbContext : IdentityDbContext<IdentityUser<Guid>, Identity
     public DbSet<Departamento> Departamentos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Procedimento> Procedimentos { get; set; }
+    public DbSet<ProcedimentoRascunho> ProcedimentosRascunhos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
