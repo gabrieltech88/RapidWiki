@@ -67,6 +67,3 @@ appsettings.*.local.json
 *.tmp
 *.temp
 *.bak
-
-# Publish
-publish/
