@@ -1,9 +1,13 @@
-using RapidWiki.Infrastructure;
+
+using System.Text.Json.Serialization;
+using RapidWiki.Infrastructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+using RapidWiki.Api.Authentication;
 using RapidWiki.Api.ExceptionHandlers;
 using RapidWiki.Application.CreateUsuario;
-using System.Text.Json.Serialization;
-using RapidWiki.Api.Authentication;
 using RapidWiki.Application.Interfaces;
+using RapidWiki.Infrastructure;
+using RapidWiki.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -58,5 +62,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<RapidWikiDbContext>();
+    await dbContext.Database.MigrateAsync();
+
+    var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
+    await seeder.SeedAsync();
+}
 
 app.Run();
