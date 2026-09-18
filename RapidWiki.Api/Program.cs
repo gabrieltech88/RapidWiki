@@ -14,10 +14,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration); 
 builder.Services.AddAutoMapper( cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
-/*builder.WebHost.ConfigureKestrel(options =>
+builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8018);
-}); */
+}); 
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -64,13 +64,13 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-/*await using (var scope = app.Services.CreateAsyncScope())
+await using (var scope = app.Services.CreateAsyncScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<RapidWikiDbContext>();
     await dbContext.Database.MigrateAsync();
 
     var seeder = scope.ServiceProvider.GetRequiredService<DatabaseSeeder>();
     await seeder.SeedAsync();
-}*/
+}
 
 app.Run();
