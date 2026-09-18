@@ -9,6 +9,7 @@ public class AuthenticationService : IAuthService
 {
     private readonly UserManager<IdentityUser<Guid>> _userManager;
     private readonly SignInManager<IdentityUser<Guid>> _signInManager;
+
     public AuthenticationService(UserManager<IdentityUser<Guid>> userManager, SignInManager<IdentityUser<Guid>> signInManager)
     {
         _userManager = userManager;
@@ -24,13 +25,16 @@ public class AuthenticationService : IAuthService
             throw new UnauthorizedAccessException("Email ou senha inválidos.");
         }
 
+        if (!user.EmailConfirmed)
+        {
+            throw new UnauthorizedAccessException("Usuário desativado.");
+        }
+
         var result = await _signInManager.PasswordSignInAsync(user, request.Password, false, false);
 
         if (!result.Succeeded)
         {
-            throw new UnauthorizedAccessException(
-                "Email ou senha inválidos."
-            );
+            throw new UnauthorizedAccessException("Email ou senha inválidos.");
         }
 
         var roles = await _userManager.GetRolesAsync(user);
@@ -38,12 +42,7 @@ public class AuthenticationService : IAuthService
         return new SignInResult
         {
             Id = user.Id,
-
-            Role =
-                roles.SingleOrDefault()
-                ?? throw new InvalidOperationException(
-                    "Usuário não possui uma role."
-                )
+            Role = roles.SingleOrDefault() ?? throw new InvalidOperationException("Usuário não possui uma role.")
         };
     }
 
@@ -51,5 +50,4 @@ public class AuthenticationService : IAuthService
     {
         await _signInManager.SignOutAsync();
     }
-    
 }

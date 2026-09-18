@@ -1,29 +1,26 @@
-using AutoMapper;
 using MediatR;
 using RapidWiki.Application.Interfaces;
 using RapidWiki.Domain.Entities;
 
 namespace RapidWiki.Application.CreateUsuario;
 
-public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest,CreateUsuarioResult>
+public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest, CreateUsuarioResult>
 {
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly IDepartamentoRepository _departamentoRepository;
     private readonly IIdentityService _identityService;
     private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
 
-    public CreateUsuarioHandler(IUsuarioRepository usuarioRepository,
+    public CreateUsuarioHandler(
+        IUsuarioRepository usuarioRepository,
         IDepartamentoRepository departamentoRepository,
         IIdentityService identityService,
-        IUnitOfWork unitOfWork,
-        IMapper mapper)
+        IUnitOfWork unitOfWork)
     {
         _usuarioRepository = usuarioRepository;
         _departamentoRepository = departamentoRepository;
         _identityService = identityService;
         _unitOfWork = unitOfWork;
-        _mapper = mapper;
     }
 
     public async Task<CreateUsuarioResult> Handle(CreateUsuarioRequest request, CancellationToken cancellationToken)
@@ -32,13 +29,16 @@ public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest,CreateU
 
         try
         {
-            var usuario = _mapper.Map<Usuario>(request);
+            var usuario = new Usuario(
+                Guid.NewGuid(),
+                request.Nome
+            );
 
             foreach (var departamentoId in request.DepartamentoIds)
             {
                 var departamento = await _departamentoRepository.GetByIdAsync(departamentoId);
 
-                if (departamento == null)
+                if (departamento is null)
                 {
                     throw new InvalidOperationException($"Departamento {departamentoId} não encontrado.");
                 }
@@ -48,7 +48,12 @@ public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest,CreateU
 
             await _usuarioRepository.CreateAsync(usuario);
 
-            await _identityService.CreateUsuarioAsync(usuario.Id, request.Email, request.Password, request.Role);
+            await _identityService.CreateUsuarioAsync(
+                usuario.Id,
+                request.Email,
+                request.Password,
+                request.Role
+            );
 
             await _unitOfWork.SaveChangesAsync();
             await _unitOfWork.CommitAsync();
@@ -61,7 +66,6 @@ public class CreateUsuarioHandler : IRequestHandler<CreateUsuarioRequest,CreateU
         catch
         {
             await _unitOfWork.RollbackAsync();
-
             throw;
         }
     }

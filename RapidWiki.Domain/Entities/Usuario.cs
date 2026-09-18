@@ -7,6 +7,7 @@ public class Usuario
 
     public Guid Id { get; private set; }
     public string Nome { get; private set; }
+    public bool DeveAlterarSenha { get; private set; }
 
     private Usuario() { }
 
@@ -14,6 +15,7 @@ public class Usuario
     {
         Id = id;
         Nome = nome;
+        DeveAlterarSenha = true;
     }
 
     public void Atualizar(string nome, IEnumerable<Departamento> departamentos)
@@ -28,4 +30,13 @@ public class Usuario
         }
     }
 
+    public void ConfirmarTrocaDeSenha()
+    {
+        DeveAlterarSenha = false;
+    }
+
+    public void ExigirTrocaDeSenha()
+    {
+        DeveAlterarSenha = true;
+    }
 }
