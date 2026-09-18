@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using RapidWiki.Application.Interfaces;
 
 namespace RapidWiki.Infrastructure.Services;
@@ -30,14 +31,10 @@ public class ImageStorageService : IImageStorageService
 
     private readonly string _storagePath;
 
-    public ImageStorageService()
+    public ImageStorageService(IConfiguration configuration)
     {
-        _storagePath = Path.Combine(
-            Directory.GetCurrentDirectory(),
-            "Storage",
-            "Images",
-            "Procedures"
-        );
+
+        _storagePath = configuration["Storage:ImagesPath"] ?? throw new InvalidOperationException("Storage:ImagesPath não foi configurado.");
 
         Directory.CreateDirectory(_storagePath);
     }
