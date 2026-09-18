@@ -42,7 +42,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173", "http://200.219.56.54")
+            .WithOrigins("http://localhost:5173", "https://rapidwiki.backbonne.com.br")
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
