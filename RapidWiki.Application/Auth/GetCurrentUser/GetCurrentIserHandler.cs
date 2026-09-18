@@ -1,13 +1,11 @@
 using MediatR;
 using RapidWiki.Application.Interfaces;
-using RapidWiki.Domain.Entities;
 
 namespace RapidWiki.Application.GetCurrentUser;
 
-public class GetCurrentUserHandler : IRequestHandler<GetCurrentUserRequest,GetCurrentUserResult>
+public class GetCurrentUserHandler : IRequestHandler<GetCurrentUserRequest, GetCurrentUserResult>
 {
     private readonly ICurrentUser _currentUser;
-
     private readonly IUsuarioRepository _usuarioRepository;
 
     public GetCurrentUserHandler(ICurrentUser currentUser, IUsuarioRepository usuarioRepository)
@@ -29,7 +27,8 @@ public class GetCurrentUserHandler : IRequestHandler<GetCurrentUserRequest,GetCu
         {
             Id = usuario.Id,
             Nome = usuario.Nome,
-            Role = _currentUser.Role
+            Role = _currentUser.Role,
+            DeveAlterarSenha = usuario.DeveAlterarSenha
         };
     }
 }

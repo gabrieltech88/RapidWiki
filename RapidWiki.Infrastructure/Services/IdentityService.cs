@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Identity;
 using RapidWiki.Application.Common.Dto;
 using RapidWiki.Application.Interfaces;
 
-
 namespace RapidWiki.Infrastructure.Services;
 
 public class IdentityService : IIdentityService
@@ -20,7 +19,8 @@ public class IdentityService : IIdentityService
         {
             Id = id,
             UserName = email,
-            Email = email
+            Email = email,
+            EmailConfirmed = true
         };
 
         var result = await _userManager.CreateAsync(identityUser, password);
@@ -28,10 +28,7 @@ public class IdentityService : IIdentityService
         if (!result.Succeeded)
         {
             throw new InvalidOperationException(
-                string.Join(
-                    ", ",
-                    result.Errors.Select(x => x.Description)
-                )
+                string.Join(", ", result.Errors.Select(x => x.Description))
             );
         }
 
@@ -40,10 +37,7 @@ public class IdentityService : IIdentityService
         if (!roleResult.Succeeded)
         {
             throw new InvalidOperationException(
-                string.Join(
-                    ", ",
-                    roleResult.Errors.Select(x => x.Description)
-                )
+                string.Join(", ", roleResult.Errors.Select(x => x.Description))
             );
         }
 
@@ -66,14 +60,14 @@ public class IdentityService : IIdentityService
 
         if (!updateResult.Succeeded)
         {
-            throw new InvalidOperationException(string.Join(", ", updateResult.Errors.Select(x => x.Description)));
+            throw new InvalidOperationException(
+                string.Join(", ", updateResult.Errors.Select(x => x.Description))
+            );
         }
 
         var currentRoles = await _userManager.GetRolesAsync(identityUser);
-        if (
-            currentRoles.Count == 1 &&
-            currentRoles.Contains(role)
-        )
+
+        if (currentRoles.Count == 1 && currentRoles.Contains(role))
         {
             return;
         }
@@ -84,11 +78,15 @@ public class IdentityService : IIdentityService
 
             if (!addRoleResult.Succeeded)
             {
-                throw new InvalidOperationException(string.Join(", ", addRoleResult.Errors.Select(x => x.Description)));
+                throw new InvalidOperationException(
+                    string.Join(", ", addRoleResult.Errors.Select(x => x.Description))
+                );
             }
         }
 
-        var rolesToRemove = currentRoles.Where(currentRole => currentRole != role).ToList();
+        var rolesToRemove = currentRoles
+            .Where(currentRole => currentRole != role)
+            .ToList();
 
         if (rolesToRemove.Count > 0)
         {
@@ -96,8 +94,63 @@ public class IdentityService : IIdentityService
 
             if (!removeRoleResult.Succeeded)
             {
-                throw new InvalidOperationException(string.Join(", ", removeRoleResult.Errors.Select(x => x.Description)));
+                throw new InvalidOperationException(
+                    string.Join(", ", removeRoleResult.Errors.Select(x => x.Description))
+                );
             }
+        }
+    }
+
+    public async Task UpdateUsuarioStatusAsync(Guid id, bool ativo)
+    {
+        var identityUser = await _userManager.FindByIdAsync(id.ToString());
+
+        if (identityUser is null)
+        {
+            throw new KeyNotFoundException("Usuário não encontrado no Identity.");
+        }
+
+        identityUser.EmailConfirmed = ativo;
+
+        var result = await _userManager.UpdateAsync(identityUser);
+
+        if (!result.Succeeded)
+        {
+            throw new InvalidOperationException(
+                string.Join(", ", result.Errors.Select(x => x.Description))
+            );
+        }
+    }
+
+    public async Task ChangePasswordAsync(Guid id, string senhaAtual, string novaSenha)
+    {
+        var identityUser = await _userManager.FindByIdAsync(id.ToString());
+
+        if (identityUser is null)
+        {
+            throw new KeyNotFoundException("Usuário não encontrado no Identity.");
+        }
+
+        var result = await _userManager.ChangePasswordAsync(
+            identityUser,
+            senhaAtual,
+            novaSenha
+        );
+
+        if (!result.Succeeded)
+        {
+            var passwordMismatch = result.Errors.Any(error =>
+                error.Code == "PasswordMismatch"
+            );
+
+            if (passwordMismatch)
+            {
+                throw new UnauthorizedAccessException("Senha atual incorreta.");
+            }
+
+            throw new InvalidOperationException(
+                string.Join(", ", result.Errors.Select(x => x.Description))
+            );
         }
     }
 
@@ -116,8 +169,8 @@ public class IdentityService : IIdentityService
         {
             Id = identityUser.Id,
             Email = identityUser.Email ?? string.Empty,
-            Role = roles.FirstOrDefault() ?? string.Empty
+            Role = roles.FirstOrDefault() ?? string.Empty,
+            Ativo = identityUser.EmailConfirmed
         };
     }
-
 }

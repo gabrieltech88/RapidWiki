@@ -46,6 +46,7 @@ public class GetUsuariosHandler : IRequestHandler<GetUsuariosRequest, GetUsuario
                 Id = usuario.Id,
                 Nome = usuario.Nome,
                 Email = identity.Email,
+                Ativo = identity.Ativo,
                 Role = identity.Role,
                 Departamentos = usuario.Departamentos.Select(departamento => new DepartamentoDto
                 {
