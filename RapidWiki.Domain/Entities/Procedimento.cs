@@ -33,6 +33,9 @@ public class Procedimento
 
     private Procedimento()
     {
+        Id = Guid.NewGuid();
+        CriadoEm = DateTime.UtcNow;
+        AtualizadoEm = DateTime.UtcNow;
     }
 
 

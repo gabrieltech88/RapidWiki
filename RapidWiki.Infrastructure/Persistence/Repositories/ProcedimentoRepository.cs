@@ -79,7 +79,8 @@ public class ProcedimentoRepository : IProcedimentoRepository
                     Id = p.Autor.Id,
                     Nome = p.Autor.Nome,
                 },
-                AtualizadoEm = p.AtualizadoEm
+                AtualizadoEm = p.AtualizadoEm,
+                Status = p.Status
             })
             .ToListAsync(cancellationToken);
 
