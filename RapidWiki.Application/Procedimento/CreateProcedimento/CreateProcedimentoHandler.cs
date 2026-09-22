@@ -37,6 +37,8 @@ public class CreateProcedimentoHandler : IRequestHandler<CreateProcedimentoReque
         }
 
         var procedimento = _mapper.Map<Procedimento>(request);
+
+        Console.WriteLine($"CriadoEm após mapper: {procedimento.CriadoEm:O}");
         procedimento.AutorId = _currentUser.Id;
 
         foreach (var departamentoId in departamentosIds)

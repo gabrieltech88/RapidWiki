@@ -1,3 +1,5 @@
+using RapidWiki.Domain.Enums;
+
 namespace RapidWiki.Application.Common.Dto;
 
 public record ProcedimentoDto
@@ -8,4 +10,5 @@ public record ProcedimentoDto
     required public string Descricao { get; init; }
     required public AutorDto Autor  { get; init; }
     required public DateTime AtualizadoEm { get; init; }
+    required public StatusProcedimento Status { get; init; }
 }

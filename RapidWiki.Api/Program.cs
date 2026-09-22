@@ -7,7 +7,6 @@ using RapidWiki.Api.ExceptionHandlers;
 using RapidWiki.Application.CreateUsuario;
 using RapidWiki.Application.Interfaces;
 using RapidWiki.Infrastructure;
-using RapidWiki.Infrastructure.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
