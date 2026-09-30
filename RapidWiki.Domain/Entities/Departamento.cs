@@ -1,23 +1,22 @@
-namespace RapidWiki.Domain.Entities
+namespace RapidWiki.Domain.Entities;
+
+public class Departamento
 {
-    public class Departamento
+    public Guid Id { get; set; }
+    public string Nome { get; set; }
+    public ICollection<Usuario> Usuarios { get; private set; } = [];
+    public ICollection<Procedimento> Procedimentos { get; private set; } = [];
+    public ICollection<Arquivo> Arquivos { get; private set; } = [];
+
+    private Departamento() { }
+    public Departamento(string nome)
     {
-        public Guid Id { get; set; }
-        public string Nome { get; set; }
-        public ICollection<Usuario> Usuarios { get; private set; } = [];
-        public ICollection<Procedimento> Procedimentos { get; private set; } = [];
+        Id = Guid.NewGuid();
+        Nome = nome;
+    }
 
-        private Departamento() { }
-
-        public Departamento(string nome)
-        {
-            Id = Guid.NewGuid();
-            Nome = nome;
-        }
-
-        public void AtualizarNome(string nome)
-        {
-            Nome = nome;
-        }
+    public void AtualizarNome(string nome)
+    {
+        Nome = nome;
     }
 }

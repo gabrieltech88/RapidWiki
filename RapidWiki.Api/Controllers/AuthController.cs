@@ -14,25 +14,25 @@ namespace RapidWiki.Api.Controllers;
 [Route("app/v1/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _sender;
 
-    public AuthController(IMediator mediator)
+    public AuthController(ISender sender)
     {
-        _mediator = mediator;
+        _sender = sender;
     }
 
     [Authorize(Roles = $"{Roles.Admin}")]
     [HttpPost("create_role")]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Created(string.Empty, result);
     }
 
     [HttpPost("sign_in")]
     public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -40,7 +40,7 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
-        var result = await _mediator.Send(new GetCurrentUserRequest());
+        var result = await _sender.Send(new GetCurrentUserRequest());
         return Ok(result);
     }
 
@@ -48,7 +48,7 @@ public class AuthController : ControllerBase
     [HttpPut("change_password")]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
     {
-        await _mediator.Send(request);
+        await _sender.Send(request);
         return NoContent();
     }
 
@@ -56,7 +56,7 @@ public class AuthController : ControllerBase
     [HttpPost("sign_out")]
     public async Task<IActionResult> SignOutUser()
     {
-        await _mediator.Send(new SignOutRequest());
+        await _sender.Send(new SignOutRequest());
         return NoContent();
     }
 }

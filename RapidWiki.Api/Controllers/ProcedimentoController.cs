@@ -17,18 +17,18 @@ namespace RapidWiki.Api.Controllers;
 [Route("app/v1/procedimento")]
 public class ProcedimentoController : ControllerBase
 {
-    private readonly IMediator _mediator;
+    private readonly ISender _sender;
 
-    public ProcedimentoController(IMediator mediator)
+    public ProcedimentoController(ISender sender)
     {
-        _mediator = mediator;
+        _sender = sender;
     }
 
     [Authorize(Roles = $"{Roles.Admin}, {Roles.Editor}")]
     [HttpPost("create_procedimento")]
     public async Task<IActionResult> CreateProcedimento([FromBody] CreateProcedimentoRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Created(string.Empty, result);
     }
 
@@ -36,7 +36,7 @@ public class ProcedimentoController : ControllerBase
     [HttpGet("get_procedimentos")]
     public async Task<IActionResult> GetProcedimentos([FromQuery] GetProcedimentosRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -44,7 +44,7 @@ public class ProcedimentoController : ControllerBase
     [HttpGet("get_procedimento_by_id/{id:guid}")]
     public async Task<IActionResult> GetProcedimentoById(Guid id)
     {
-        var result = await _mediator.Send(new GetProcedimentoByIdRequest(id));
+        var result = await _sender.Send(new GetProcedimentoByIdRequest(id));
         return Ok(result);
     }
 
@@ -52,7 +52,7 @@ public class ProcedimentoController : ControllerBase
     [HttpGet("get_procedimento_for_edit/{id:guid}")]
     public async Task<IActionResult> GetProcedimentoForEdit(Guid id)
     {
-        var result = await _mediator.Send(new GetProcedimentoForEditRequest(id));
+        var result = await _sender.Send(new GetProcedimentoForEditRequest(id));
         return Ok(result);
     }
 
@@ -60,7 +60,7 @@ public class ProcedimentoController : ControllerBase
     [HttpGet("get_rascunhos")]
     public async Task<IActionResult> GetRascunhos([FromQuery] GetRascunhosRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -68,7 +68,7 @@ public class ProcedimentoController : ControllerBase
     [HttpPut("update_procedimento")]
     public async Task<IActionResult> UpdateProcedimento([FromBody] UpdateProcedimentoRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -76,7 +76,7 @@ public class ProcedimentoController : ControllerBase
     [HttpDelete("delete_procedimento/{id:guid}")]
     public async Task<IActionResult> DeleteProcedimento(Guid id)
     {
-        await _mediator.Send(new DeleteProcedimentoRequest(id));
+        await _sender.Send(new DeleteProcedimentoRequest(id));
         return NoContent();
     }
 
@@ -84,7 +84,7 @@ public class ProcedimentoController : ControllerBase
     [HttpDelete("delete_rascunho/{id:guid}")]
     public async Task<IActionResult> DeleteRascunho(Guid id)
     {
-        await _mediator.Send(new DeleteRascunhoRequest(id));
+        await _sender.Send(new DeleteRascunhoRequest(id));
         return NoContent();
     }
 }
