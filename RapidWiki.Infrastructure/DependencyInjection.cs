@@ -7,6 +7,7 @@ using RapidWiki.Application.Interfaces;
 using RapidWiki.Infrastructure.Persistence;
 using RapidWiki.Infrastructure.Persistence.Repositories;
 using RapidWiki.Infrastructure.Services;
+using RapidWiki.Infrastructure.Storage;
 
 namespace RapidWiki.Infrastructure;
 
@@ -44,11 +45,13 @@ public static class DependencyInjection
         services.AddScoped<IImageStorageService, ImageStorageService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IAuthService, AuthenticationService>();
+        services.AddScoped<IArquivoStorageService, ArquivoStorageService>();
 
         services.AddScoped<IUsuarioRepository, UsuarioRepository>();
         services.AddScoped<IDepartamentoRepository, DepartamentoRepository>();
         services.AddScoped<IProcedimentoRepository, ProcedimentoRepository>();
         services.AddScoped<IProcedimentoRascunhoRepository, ProcedimentoRascunhoRepository>();
+        services.AddScoped<IArquivoRepository, ArquivoRepository>();
 
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<DatabaseSeeder>();

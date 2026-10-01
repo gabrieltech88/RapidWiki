@@ -15,6 +15,7 @@ public class RapidWikiDbContext : IdentityDbContext<IdentityUser<Guid>, Identity
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Procedimento> Procedimentos { get; set; }
     public DbSet<ProcedimentoRascunho> ProcedimentosRascunhos { get; set; }
+    public DbSet<Arquivo> Arquivos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,5 +45,11 @@ public class RapidWikiDbContext : IdentityDbContext<IdentityUser<Guid>, Identity
             .WithMany(u => u.Procedimentos)
             .HasForeignKey(p => p.AutorId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        // Arquivo <-> Departamento
+        modelBuilder.Entity<Arquivo>()
+            .HasMany(a => a.Departamentos)
+            .WithMany(d => d.Arquivos)
+            .UsingEntity(j => j.ToTable("ArquivosDepartamentos"));
     }
 }

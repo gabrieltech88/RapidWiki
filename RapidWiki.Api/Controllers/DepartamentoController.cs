@@ -15,17 +15,17 @@ namespace RapidWiki.Api.Controllers;
 [Route("app/v1/departamento")]
 public class DepartamentoController : ControllerBase
 {
-    private readonly IMediator _mediator;
-    public DepartamentoController(IMediator mediator)
+    private readonly ISender _sender;
+    public DepartamentoController(ISender sender)
     {
-        _mediator = mediator;
+        _sender = sender;
     }
 
     [Authorize(Roles = $"{Roles.Admin}")]
     [HttpPost("create_departamento")]
     public async Task<IActionResult> CreateDepartamento([FromBody] CreateDepartamentoRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Created(string.Empty, result);
     }
 
@@ -34,7 +34,7 @@ public class DepartamentoController : ControllerBase
     public async Task<IActionResult> GetAllDepartamentos()
     {
         var request = new GetAllDepartamentosRequest();
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -43,7 +43,7 @@ public class DepartamentoController : ControllerBase
     public async Task<IActionResult> UpdateDepartamento(
         [FromBody] UpdateDepartamentoRequest request)
     {
-        var result = await _mediator.Send(request);
+        var result = await _sender.Send(request);
         return Ok(result);
     }
 
@@ -51,7 +51,7 @@ public class DepartamentoController : ControllerBase
     [HttpDelete("delete_departamento/{id:guid}")]
     public async Task<IActionResult> DeleteDepartamento([FromRoute] Guid id)
     {
-        await _mediator.Send(new DeleteDepartamentoRequest(id));
+        await _sender.Send(new DeleteDepartamentoRequest(id));
         return NoContent();
     }
 
@@ -59,7 +59,7 @@ public class DepartamentoController : ControllerBase
     [HttpGet("get_departamentos_para_procedimento")]
     public async Task<IActionResult> GetDepartamentosParaProcedimento()
     {
-        var result = await _mediator.Send(new GetDepartamentosParaProcedimentoRequest());
+        var result = await _sender.Send(new GetDepartamentosParaProcedimentoRequest());
 
         return Ok(result);
     }
