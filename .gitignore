@@ -67,3 +67,5 @@ appsettings.*.local.json
 *.tmp
 *.temp
 *.bak
+
+Storage/

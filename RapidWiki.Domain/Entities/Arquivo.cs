@@ -19,6 +19,7 @@ public class Arquivo
     {
         Id = Guid.NewGuid();
         Nome = nome;
+        TamanhoBytes = tamanhoBytes;
         Tipo = tipo;
         Departamentos = [];
         CriadoEm = DateTime.UtcNow;

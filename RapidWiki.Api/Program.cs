@@ -13,10 +13,10 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddInfrastructure(builder.Configuration); 
 builder.Services.AddAutoMapper( cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
-/* builder.WebHost.ConfigureKestrel(options =>
+builder.WebHost.ConfigureKestrel(options =>
 {
     options.ListenAnyIP(8018);
-}); */
+}); 
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
